@@ -26,7 +26,7 @@ FuseTS is an advanced Habbo Hotel emulator built using TypeScript and Node.js, d
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/fuse-ts.git
+git clone https://github.com/Dippys/fuse-ts.git
 cd fuse-ts
 ```
 

@@ -15,11 +15,6 @@ export class GameClient {
     private _machineId: string = "";
     private _session: Session;
 
-    // Packet tracking similar to Java version
-    private incomingPacketCounter: Map<number, number> = new Map();
-    private messageTimestamps: Map<string, number> = new Map();
-    private lastPacketCounterCleared: number = Math.floor(Date.now() / 1000);
-
     constructor(session: Session) {
         this._session = session;
         this._connectionId = session.connectionId;

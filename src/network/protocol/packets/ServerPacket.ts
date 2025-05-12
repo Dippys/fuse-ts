@@ -1,5 +1,4 @@
 // src/network/protocol/packets/ServerPacket.ts
-import logger from '@/utils/logger';
 
 export class ServerPacket {
     private initialized: boolean = false;

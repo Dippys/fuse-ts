@@ -1,0 +1,47 @@
+{
+  "name": "fuse-ts",
+  "version": "1.0.0",
+  "description": "A Habbo Hotel emulator using TypeScript and Node.js",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec \"node -r ts-node/register -r tsconfig-paths/register src/index.ts\"",
+    "build": "tsc",
+    "prisma:generate": "prisma generate --schema=src/database/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=src/database/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "@types/bn.js": "^5.1.6",
+    "bcrypt": "^5.1.1",
+    "bn.js": "^5.2.2",
+    "dotenv": "^16.5.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "pino-roll": "^3.1.0",
+    "redis": "^5.0.1",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.2",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.15.16",
+    "@types/ws": "^8.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
+    "eslint": "^9.26.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.5.3",
+    "prisma": "^6.7.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "prisma": {
+    "schema": "./src/database/prisma"
+  }
+}

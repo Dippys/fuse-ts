@@ -1,0 +1,127 @@
+// Prisma schema for Habbo emulator
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  username      String         @unique
+  email         String         @unique
+  password      String
+  motto         String         @default("")
+  figure        String         @default("")
+  credits       Int            @default(0)
+  pixels        Int            @default(0)
+  rank          Int            @default(1)
+  ssoTicket     String         @unique
+  online        Boolean        @default(false)
+  lastOnline    DateTime       @default(now())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  rooms         Room[]
+  roomFavorites RoomFavorite[]
+  friendships1  Friendship[]   @relation("user1")
+  friendships2  Friendship[]   @relation("user2")
+  badges        Badge[]
+  inventory     Item[]
+}
+
+model Room {
+  id          String         @id @default(uuid())
+  name        String
+  description String         @default("")
+  category    Int            @default(0)
+  maxUsers    Int            @default(25)
+  tradeState  Int            @default(0)
+  score       Int            @default(0)
+  ownerId     String
+  owner       User           @relation(fields: [ownerId], references: [id])
+  floorItems  Item[]         @relation("FloorItems")
+  wallItems   Item[]         @relation("WallItems")
+  favorites   RoomFavorite[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Friendship {
+  id        String   @id @default(uuid())
+  user1Id   String
+  user2Id   String
+  user1     User     @relation("user1", fields: [user1Id], references: [id])
+  user2     User     @relation("user2", fields: [user2Id], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([user1Id, user2Id])
+}
+
+model RoomFavorite {
+  id        String   @id @default(uuid())
+  userId    String
+  roomId    String
+  user      User     @relation(fields: [userId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, roomId])
+}
+
+model Badge {
+  id     String @id @default(uuid())
+  code   String
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  slotId Int?
+
+  @@unique([userId, code])
+}
+
+model Item {
+  id         String   @id @default(uuid())
+  baseItemId Int
+  userId     String?
+  roomId     String?
+  x          Int      @default(0)
+  y          Int      @default(0)
+  z          Float    @default(0)
+  rotation   Int      @default(0)
+  wallPos    String?
+  extraData  String?
+  user       User?    @relation(fields: [userId], references: [id])
+  floorRoom  Room?    @relation("FloorItems", fields: [roomId], references: [id], map: "Item_floorRoomId_fkey")
+  wallRoom   Room?    @relation("WallItems", fields: [roomId], references: [id], map: "Item_wallRoomId_fkey")
+  createdAt  DateTime @default(now())
+}
+
+model CatalogPage {
+  id           Int           @id @default(autoincrement())
+  parentId     Int?
+  caption      String
+  pageName     String
+  iconColor    Int           @default(0)
+  iconImage    Int           @default(0)
+  visible      Boolean       @default(true)
+  enabled      Boolean       @default(true)
+  minRank      Int           @default(1)
+  orderNum     Int           @default(0)
+  catalogItems CatalogItem[]
+}
+
+model CatalogItem {
+  id           Int         @id @default(autoincrement())
+  pageId       Int
+  catalogPage  CatalogPage @relation(fields: [pageId], references: [id])
+  itemId       Int
+  name         String
+  credits      Int         @default(0)
+  pixels       Int         @default(0)
+  amount       Int         @default(1)
+  limitedTotal Int?
+  limitedSold  Int         @default(0)
+}

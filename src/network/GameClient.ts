@@ -116,21 +116,4 @@ export class GameClient {
             logger.error(`Error sending responses: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
-
-    public disconnect(): void {
-        this._authenticated = false;
-
-        try {
-            // Close the session if it exists
-            if (this._session) {
-                // Close the socket connection
-                this._session.close();
-                logger.info(`Disconnected client: ${this._connectionId}`);
-            }
-        } catch (error) {
-            logger.error(`Error disconnecting client: ${error instanceof Error ? error.message : String(error)}`);
-        } finally {
-            this._session = null as any;
-        }
-    }
 }

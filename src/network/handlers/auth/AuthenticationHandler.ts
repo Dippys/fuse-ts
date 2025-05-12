@@ -37,7 +37,7 @@ export class AuthenticationHandler {
 
             if (!session.encryption) {
                 logger.error(`No encryption setup for client ${data.connectionId}`);
-                session.client.disconnect();
+                session.close();
                 return;
             }
 
@@ -99,42 +99,34 @@ export class AuthenticationHandler {
     private async handleSSOTicket(message: string): Promise<void> {
         try {
             const data = JSON.parse(message);
-            const session = SessionManager.getSession(data.connectionId);
+            const connectionId = data.connectionId;
+            const session = SessionManager.getSession(connectionId);
 
             if (!session) {
-                logger.warn(`No session found for connectionId: ${data.connectionId}`);
+                logger.warn(`No session found for connectionId: ${connectionId}`);
                 return;
             }
-
-            console.log(data);
 
             if (!data.ssoTicket) {
-                logger.error(`No SSO ticket provided for connectionId: ${data.connectionId}`);
-                session.client.disconnect();
+                logger.error(`No SSO ticket provided for connectionId: ${connectionId}`);
+                // Use SessionManager directly to avoid potential infinite recursion
+                SessionManager.removeSession(connectionId);
                 return;
             }
-
-            // some security manager stuff should go here
-            // const userid = await securityManager.getUserIdFromSSOTicket(data.ssoTicket);
-            // some user validation should go here
 
             const userid = await new SecurityManager().getUserIdFromSSOTicket(data.ssoTicket);
 
             if (!userid) {
-                logger.error(`Invalid SSO ticket for connectionId: ${data.connectionId}`);
-                session.client.disconnect();
+                logger.error(`Invalid SSO ticket for connectionId: ${connectionId}`);
+                // Use SessionManager directly instead of session.close()
+                SessionManager.removeSession(connectionId);
                 return;
             }
 
             console.log(userid);
 
-            // then we create a new session for the user
-            // const player = await playerManager.createPlayer(userid, session);
-            // some user validation should go here
-
-
-            // Placeholder for SSO ticket handling
-            logger.debug(`Received SSO ticket from client ${data.connectionId}: ${data.ssoTicket}`);
+            // Rest of your logic...
+            logger.debug(`Received SSO ticket from client ${connectionId}: ${data.ssoTicket}`);
         } catch (error) {
             logger.error(`Error handling SSO ticket: ${error instanceof Error ? error.message : String(error)}`);
         }

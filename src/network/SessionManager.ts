@@ -10,6 +10,8 @@ export interface EnhancedSession extends Session {
     dhPrivateKey?: string;
     rsaSharedKey?: string;
     enableEncryption(): void;
+    // Add a flag to track if session is being closed
+    _isClosing?: boolean;
 }
 
 export class SessionManager {
@@ -22,6 +24,7 @@ export class SessionManager {
             ...session,
             client,
             encryption: client.encryption,
+            _isClosing: false,
 
             // Implementation of the enableEncryption method
             enableEncryption(): void {
@@ -51,6 +54,38 @@ export class SessionManager {
             }
         };
 
+        // Override the close method to prevent recursion
+        const originalClose = enhancedSession.close;
+        enhancedSession.close = function(): void {
+            // Prevent recursion - if already closing, just return
+            if (this._isClosing) {
+                logger.debug(`Session ${this.connectionId} is already being closed, ignoring duplicate close`);
+                return;
+            }
+
+            // Mark session as closing
+            this._isClosing = true;
+            logger.debug(`Closing session ${this.connectionId}`);
+
+            // Remove from session manager first
+            SessionManager.sessions.delete(this.connectionId);
+
+            // Then close the socket through the original close method
+            try {
+                originalClose.call(this);
+            } catch (error) {
+                logger.error(`Error in original close for session ${this.connectionId}: ${error}`);
+                // Try to force close the socket if possible
+                try {
+                    if (this.socket && !this.socket.destroyed) {
+                        this.socket.destroy();
+                    }
+                } catch (socketError) {
+                    logger.error(`Failed to destroy socket: ${socketError}`);
+                }
+            }
+        };
+
         this.sessions.set(session.connectionId, enhancedSession);
         logger.debug(`Created session: ${session.connectionId}`);
         return enhancedSession;
@@ -62,19 +97,62 @@ export class SessionManager {
     }
 
     public static removeSession(connectionId: string): boolean {
+        // Get session first
         const session = this.sessions.get(connectionId);
-        if (session) {
-            session.client.disconnect();
-        }
 
+        // Remove from sessions map BEFORE doing anything else
         const result = this.sessions.delete(connectionId);
+
         if (result) {
             logger.debug(`Removed session: ${connectionId}`);
+
+            // If we have a session and it's not already closing, close socket safely
+            if (session && !session._isClosing) {
+                try {
+                    // Mark as closing
+                    session._isClosing = true;
+
+                    // Instead of calling session.close(), access socket directly
+                    if (session.socket && !session.socket.destroyed) {
+                        try {
+                            session.socket.end();
+                            session.socket.unref();
+
+                            // Force destroy after a delay if needed
+                            setTimeout(() => {
+                                try {
+                                    if (session.socket && !session.socket.destroyed) {
+                                        session.socket.destroy();
+                                    }
+                                } catch (e) {
+                                    // Ignore errors during forced destruction
+                                }
+                            }, 500);
+                        } catch (socketError) {
+                            logger.error(`Error closing socket for session ${connectionId}: ${socketError}`);
+                            // Last resort - try to force destroy
+                            try {
+                                session.socket.destroy();
+                            } catch (e) {
+                                // Ignore final destroy errors
+                            }
+                        }
+                    }
+                } catch (error) {
+                    logger.error(`Error during session cleanup for ${connectionId}: ${error}`);
+                }
+            }
         }
+
         return result;
     }
 
     public static getAllSessions(): EnhancedSession[] {
         return Array.from(this.sessions.values());
+    }
+
+    // Add a utility method for debugging
+    public static getSessionCount(): number {
+        return this.sessions.size;
     }
 }

@@ -1,5 +1,5 @@
 // src/network/GameClient.ts
-import { HabboEncryption } from "@/security/HabboEcryption";
+import { HabboEncryption } from "@/security/HabboEncryption";
 import { Session } from "@/network/sockets";
 import logger from "@/utils/logger";
 import {rsaConfig} from "@/config/rsaConfig";

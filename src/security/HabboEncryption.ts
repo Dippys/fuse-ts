@@ -1,4 +1,4 @@
-// src/crypto/HabboEcryption.ts
+// src/crypto/HabboEncryption.ts
 import { HabboRSACrypto } from './HabboRSACrypto';
 import { HabboDiffieHellman } from './HabboDiffieHellman';
 import { HabboRC4 } from './HabboRC4';

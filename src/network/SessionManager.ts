@@ -2,7 +2,7 @@
 import { Session } from '@/network/sockets';
 import { GameClient } from '@/network/GameClient';
 import logger from '@/utils/logger';
-import { HabboEncryption } from "@/security/HabboEcryption";
+import { HabboEncryption } from "@/security/HabboEncryption";
 
 export interface EnhancedSession extends Session {
     client: GameClient;

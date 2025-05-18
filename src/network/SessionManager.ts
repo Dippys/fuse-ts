@@ -1,22 +1,14 @@
 // src/network/SessionManager.ts
-import { Session } from '@/network/sockets';
+import { Session, EnhancedSession } from '@/types/Session';
 import { GameClient } from '@/network/GameClient';
 import logger from '@/utils/logger';
-import { HabboEncryption } from "@/security/HabboEncryption";
-
-export interface EnhancedSession extends Session {
-    client: GameClient;
-    encryption?: HabboEncryption | null;
-    dhPrivateKey?: string;
-    rsaSharedKey?: string;
-    enableEncryption(): void;
-    // Add a flag to track if session is being closed
-    _isClosing?: boolean;
-}
 
 export class SessionManager {
     private static sessions: Map<string, EnhancedSession> = new Map();
 
+    /**
+     * Creates an enhanced session with additional capabilities
+     */
     public static createSession(session: Session): EnhancedSession {
         const client = new GameClient(session);
 
@@ -91,11 +83,16 @@ export class SessionManager {
         return enhancedSession;
     }
 
-    // Other methods remain unchanged
+    /**
+     * Gets a session by connection ID
+     */
     public static getSession(connectionId: string): EnhancedSession | undefined {
         return this.sessions.get(connectionId);
     }
 
+    /**
+     * Removes a session by connection ID
+     */
     public static removeSession(connectionId: string): boolean {
         // Get session first
         const session = this.sessions.get(connectionId);
@@ -147,11 +144,16 @@ export class SessionManager {
         return result;
     }
 
+    /**
+     * Gets all active sessions
+     */
     public static getAllSessions(): EnhancedSession[] {
         return Array.from(this.sessions.values());
     }
 
-    // Add a utility method for debugging
+    /**
+     * Gets the current number of active sessions
+     */
     public static getSessionCount(): number {
         return this.sessions.size;
     }

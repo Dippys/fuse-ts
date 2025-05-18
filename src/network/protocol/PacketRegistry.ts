@@ -1,5 +1,5 @@
 // src/network/protocol/PacketRegistry.ts
-import { Session } from '@/network/sockets';
+import { Session } from '@/types/Session';
 import logger from '@/utils/logger';
 import {ClientPacket} from "@/network/protocol/packets/ClientPacket";
 import {ClientHelloMessageComposer} from "@/network/protocol/messages/incoming/auth/ClientHelloMessageComposer";

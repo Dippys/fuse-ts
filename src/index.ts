@@ -2,7 +2,7 @@
 import dotenv from 'dotenv';
 import logger from '@/utils/logger';
 import { prisma } from '@/database';
-import { startTcpServer } from '@/network/sockets';
+import { startTcpServer } from '@/network/sockets/TcpServer';
 import {HandlerRegistry} from "@/network/handlers/HandlerRegistry";
 
 

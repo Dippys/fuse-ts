@@ -1,6 +1,6 @@
 // src/network/protocol/messages/incoming/IncomingMessageComposer.ts
 import { ClientPacket } from "@/network/protocol/packets/ClientPacket";
-import { Session } from "@/network/sockets";
+import { Session} from "@/types/Session";
 import logger from "@/utils/logger";
 import { publish } from "@/cache/redis";
 
